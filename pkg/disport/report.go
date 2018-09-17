@@ -52,7 +52,7 @@ func Report(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreat
 // ReportEmbed for user reporting subject
 func ReportEmbed(ctx context.Context, s *discordgo.Session, user, subject *discordgo.User) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title: fmt.Sprintf("[Disport] @%s#%s reported", subject.Username, subject.Discriminator),
+		Title: fmt.Sprintf("@%s#%s reported", subject.Username, subject.Discriminator),
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    user.Username,
 			IconURL: user.AvatarURL("100x100"),
