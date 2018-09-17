@@ -99,6 +99,14 @@
   version = "v0.8.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:e0d74f32c8115b4bab4effeb765278e44a49aa195b2f9ad0254bcbf11e1ab7ec"
+  name = "github.com/playnet-public/promcord"
+  packages = ["pkg/version"]
+  pruneopts = "UT"
+  revision = "8bd5c3d7f35af412c90d37381861b301a2508abf"
+
+[[projects]]
   digest = "1:d14a5f4bfecf017cb780bdde1b6483e5deb87e12c332544d2c430eda58734bcb"
   name = "github.com/prometheus/client_golang"
   packages = [
@@ -230,6 +238,7 @@
     "github.com/go-chi/chi",
     "github.com/kelseyhightower/envconfig",
     "github.com/kolide/kit/version",
+    "github.com/playnet-public/promcord/pkg/version",
     "github.com/seibert-media/golibs/log",
     "go.opencensus.io/exporter/prometheus",
     "go.opencensus.io/stats",
