@@ -42,8 +42,6 @@ var (
 	Channel, _ = tag.NewKey("channel")
 	// User ID of the recorded metric
 	User, _ = tag.NewKey("user")
-	// Subject ID of the recorded metric
-	Subject, _ = tag.NewKey("subject")
 )
 
 var (
@@ -52,7 +50,7 @@ var (
 		Name:        "report/count",
 		Measure:     disport.ReportCount,
 		Description: "The number of reports issued",
-		TagKeys:     []tag.Key{Channel, User, Subject},
+		TagKeys:     []tag.Key{Channel, User, disport.Subject},
 		Aggregation: view.Count(),
 	}
 )

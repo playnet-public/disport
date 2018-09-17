@@ -29,7 +29,7 @@ func Report(ctx context.Context, m *discordgo.MessageCreate, u *discordgo.User) 
 		log.From(ctx).Error("adding tags", zap.Error(err))
 	}
 
-	log.From(ctx).Debug("recording metric", zap.String("payload", m.Message.Content))
+	log.From(ctx).Debug("recording metric", zap.String("subject", u.ID), zap.String("payload", m.Message.Content))
 	stats.Record(ctx, ReportCount.M(int64(1)))
 
 	return nil
