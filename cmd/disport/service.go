@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -130,11 +129,7 @@ func handler(ctx context.Context, guild string) func(s *discordgo.Session, m *di
 			return
 		}
 
-		if !strings.HasPrefix(m.Content, "!report") {
-			return
-		}
-
-		if len(m.Mentions) < 1 {
+		if len(m.Mentions) < 2 {
 			return
 		}
 
@@ -147,8 +142,36 @@ func handler(ctx context.Context, guild string) func(s *discordgo.Session, m *di
 			log.From(ctx).Error("adding tags", zap.Error(err))
 		}
 
-		for _, s := range m.Mentions {
-			disport.Report(ctx, m, s)
+		cancel := make(chan struct{})
+		for _, mention := range m.Mentions {
+			go HandleMention(ctx, s, m, mention, cancel)
 		}
 	}
+}
+
+// HandleMention by checking for a mention of the bot itself
+// If a mention is detected, the cancel channel is being closed and all other HandleMention instances may continue
+func HandleMention(ctx context.Context,
+	s *discordgo.Session, m *discordgo.MessageCreate, u *discordgo.User,
+	cancel chan struct{}) {
+
+	if u.ID == s.State.User.ID {
+		log.From(ctx).Debug("sending signal")
+		close(cancel)
+		return
+	}
+
+	log.From(ctx).Debug("waiting for signal")
+	select {
+	case _, cancel := <-cancel:
+		if cancel {
+			log.From(ctx).Debug("canceling", zap.String("reason", "signal"))
+			return
+		}
+	case <-time.After(5 * time.Second):
+		log.From(ctx).Debug("skipping message", zap.String("reason", "timeout"))
+		return
+	}
+
+	disport.Report(ctx, s, m, u)
 }
