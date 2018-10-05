@@ -39,6 +39,23 @@ The image step can be triggered manually by running `make docker CMD=//cmd/dispo
 To deploy directly to Kubernetes, run `make kube CMD=//cmd/disport:dev` which we use internally as dev deployment target.
 There will be a `:prod` target in the future.
 
+## Running
+
+To run the dev build locally simply execute `make run CMD=//cmd/disport`.
+The application requires certain environment variables to be set (instead of command line arguments).
+If required ones are missing you will see an error like the following:
+
+```bash
+ERROR: METRICS missing value: missing required key 
+HELP: METRICS: metrics port
+```
+
+Just set the required values inside your [.env](.env) file or add them before your run command:
+
+```bash
+METRICS=:8080 make run CMD=//cmd/disport
+```
+
 ## Coding and Style
 
 Our code is always checked by Travis using `make test check` therefor all Golang rules on syntax and formating have to be met for pull requests to be merged.
