@@ -31,7 +31,6 @@ type Spec struct {
 
 	Addr  string `envconfig:"metrics" required:"true" help:"metrics port"`
 	Token string `envconfig:"discord_token" required:"true" help:"discord bot token"`
-	Guild string `envconfig:"discord_guild" required:"true" help:"discord guild id"`
 }
 
 var (
@@ -49,7 +48,7 @@ var (
 		Name:        "report/count",
 		Measure:     disport.ReportCount,
 		Description: "The number of reports issued",
-		TagKeys:     []tag.Key{Channel, User, disport.Subject},
+		TagKeys:     []tag.Key{Channel, User, Guild, disport.Subject},
 		Aggregation: view.Count(),
 	}
 )
@@ -78,9 +77,7 @@ func main() {
 		log.From(ctx).Fatal("creating discord client", zap.Error(err))
 	}
 
-	ctx = log.WithFields(ctx, zap.String("guild", svc.Guild))
-
-	discord.AddHandler(handler(ctx, svc.Guild))
+	discord.AddHandler(handler(ctx))
 
 	if err := discord.Open(); err != nil {
 		log.From(ctx).Fatal("opening discord connection")
@@ -117,7 +114,7 @@ func main() {
 }
 
 // handler will get called on every message and is responsible for updating the respective metrics
-func handler(ctx context.Context, guild string) func(s *discordgo.Session, m *discordgo.MessageCreate) {
+func handler(ctx context.Context) func(s *discordgo.Session, m *discordgo.MessageCreate) {
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		ctx := log.WithFields(ctx,
 			zap.String("author", m.Author.ID),
@@ -133,8 +130,20 @@ func handler(ctx context.Context, guild string) func(s *discordgo.Session, m *di
 			return
 		}
 
-		ctx, err := tag.New(ctx,
-			tag.Insert(Guild, guild),
+		var guildID string
+		c, err := s.Channel(m.ChannelID)
+		if err != nil {
+			log.From(ctx).Error("fetching channel", zap.Error(err))
+			guildID = "error"
+		}
+
+		guildID = c.GuildID
+		ctx = log.WithFields(ctx,
+			zap.String("guild", guildID),
+		)
+
+		ctx, err = tag.New(ctx,
+			tag.Insert(Guild, guildID),
 			tag.Insert(Channel, m.ChannelID),
 			tag.Insert(User, m.Author.ID),
 		)
